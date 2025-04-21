@@ -1,25 +1,28 @@
 <?php
 
-namespace App\Entity;
+namespace App\_OLD;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
-use App\Dto\BookingRequestResponse;
-use App\State\BookingRequestProcessor;
+use App\Entity\Booking;
+use App\Entity\Customer;
+use App\State\BookingModifyProcessor;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
     operations: [
         new Post(
-            uriTemplate: '/bookings/request',
-            output: BookingRequestResponse::class,
-            name: 'booking_request',
-            processor: BookingRequestProcessor::class,
+            uriTemplate: '/bookings/modify',
+            name: 'booking_modify',
+            processor: BookingModifyProcessor::class,
         )
     ]
 )]
-class BookingRequest
+class BookingModify
 {
+    #[Assert\NotBlank]
+    public Booking $booking;
+
     #[Assert\NotBlank]
     #[Assert\Regex(
         pattern: '/^\d{4}\d{2}\d{2}$/',
@@ -34,6 +37,6 @@ class BookingRequest
     )]
     public ?string $date_to = null;
 
-    #[Assert\Type(type: ParkingSpace::class, message: 'The parking space must be a valid reference.')]
-    public ?ParkingSpace $parking_space = null;
+    #[Assert\NotBlank]
+    public Customer $customer;
 }

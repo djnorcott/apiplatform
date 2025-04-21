@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Booking;
 use App\Entity\ParkingSpace;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,30 +17,34 @@ class ParkingSpaceRepository extends ServiceEntityRepository
         parent::__construct($registry, ParkingSpace::class);
     }
 
-    /**
-     * Example: Find all active parking spaces.
-     */
-    public function findActiveSpaces(): array
+    public function findNumberOfSpacesFreeOnDates(string $dateFrom, string $dateTo): int
     {
         return $this->createQueryBuilder('ps')
-            ->where('ps.isActive = :active')
-            ->setParameter('active', true)
+            ->select('COUNT(ps.id) AS numberOfFreeSpaces')
+            ->leftJoin(
+                'App\Entity\Booking',
+                'b',
+                'WITH',
+                'b.parkingSpace = ps.id AND b.dateFrom <= :dateTo AND b.dateTo >= :dateFrom'
+            )
+            ->where('b.id IS NULL')
+            ->setParameter('dateFrom', $dateFrom)
+            ->setParameter('dateTo', $dateTo)
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
     }
 
-    public function findSpacesFreeOnDates(string $startDate, string $endDate): array
+
+    public function findCostOfBooking(string $dateFrom, string $dateTo): float
     {
-        /**
-         * select every parking space where there is not a booking between
-         * that start and end date
-         */
-        return $this->createQueryBuilder('ps')
-            ->leftJoin('ps.bookings', 'b')
-            ->andWhere('b.dateFrom IS NULL OR b.dateTo IS NULL OR (b.dateFrom > :endDate OR b.dateTo < :startDate)')
-            ->setParameter('startDate', $startDate)
-            ->setParameter('endDate', $endDate)
+        return $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select('SUM(dp.price) AS totalPrice')
+            ->from('App\Entity\DailyPrice', 'dp')
+            ->where('dp.date >= :dateFrom AND dp.date <= :dateTo')
+            ->setParameter('dateFrom', $dateFrom)
+            ->setParameter('dateTo', $dateTo)
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
     }
 }

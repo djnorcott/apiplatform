@@ -3,10 +3,29 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(), // Allows retrieving a single booking
+        new GetCollection(), // Allows retrieving a list of bookings,
+        new Post(
+            processor: 'App\State\BookingCreateProcessor'
+        ), // Handles booking creation
+        new Patch(
+            processor: 'App\State\BookingModifyProcessor'
+        ), // Handles booking modification
+        new Delete(
+            processor: 'App\State\BookingDeleteProcessor'
+        ) // Handles booking deletion
+    ]
+)]
 #[ORM\Entity]
 class Booking
 {
@@ -21,7 +40,7 @@ class Booking
 
     #[ORM\ManyToOne(targetEntity: ParkingSpace::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?ParkingSpace $space = null;
+    private ParkingSpace $parkingSpace;
 
     #[ORM\Column(type: 'string', length: 8)]
     #[Assert\NotBlank]
@@ -38,10 +57,6 @@ class Booking
         message: 'The dateTo must be in the format yyyymmdd.'
     )]
     private ?string $dateTo = null;
-
-    #[ORM\Column(type: 'string', length: 20)]
-    #[Assert\Choice(choices: ['active', 'cancelled'])]
-    private string $status = 'active';
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private float $totalPrice = 0.0;
@@ -62,14 +77,14 @@ class Booking
         return $this;
     }
 
-    public function getSpace(): ?ParkingSpace
+    public function getParkingSpace(): ParkingSpace
     {
-        return $this->space;
+        return $this->parkingSpace;
     }
 
-    public function setSpace(?ParkingSpace $space): self
+    public function setParkingSpace(?ParkingSpace $parkingSpace): self
     {
-        $this->space = $space;
+        $this->parkingSpace = $parkingSpace;
         return $this;
     }
 
@@ -95,16 +110,6 @@ class Booking
         return $this;
     }
 
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
 
     public function getTotalPrice(): float
     {

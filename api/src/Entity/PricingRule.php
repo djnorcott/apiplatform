@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity]
 class PricingRule
 {
+
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
@@ -121,4 +122,5 @@ class PricingRule
         $this->priority = $priority;
         return $this;
     }
+
 }

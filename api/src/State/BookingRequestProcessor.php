@@ -4,7 +4,9 @@ namespace App\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Dto\BookingRequestResponse;
 use App\Entity\ParkingSpace;
+use App\Repository\ParkingSpaceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class BookingRequestProcessor implements ProcessorInterface
@@ -16,25 +18,16 @@ class BookingRequestProcessor implements ProcessorInterface
         $this->entityManager = $entityManager;
     }
 
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): array
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): BookingRequestResponse
     {
-        $fromDate = \DateTime::createFromFormat('Ymd', $data->from_date);
-        $toDate = \DateTime::createFromFormat('Ymd', $data->to_date);
+        /** @var ParkingSpaceRepository $repository */
+        $repository = $this->entityManager->getRepository(ParkingSpace::class);
 
-        // Fetch all ParkingSpace records using the repository
-        $parkingSpaces = $this->entityManager->getRepository(ParkingSpace::class)->findAll();
-
-        $message = 'The following parking spaces are free: ';
-        foreach ($parkingSpaces as $parkingSpace) {
-            if ($parkingSpace->getIsActive()) {
-                $message .= $parkingSpace->getLabel() . ', ';
-            }
-        }
-
-        return [
-            'from_date' => $data->from_date,
-            'to_date' => $data->to_date,
-            'message' => $message,
-        ];
+        return new BookingRequestResponse(
+            $data->date_from,
+            $data->date_to,
+            $repository->findNumberOfSpacesFreeOnDates($data->date_from, $data->date_to),
+            $repository->findCostOfBooking($data->date_from, $data->date_to),
+        );
     }
 }
