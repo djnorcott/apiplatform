@@ -54,6 +54,10 @@ class BookingCreateProcessor implements ProcessorInterface
                 ->getQuery()
                 ->getSingleScalarResult();
 
+            if ($price === null) {
+                throw new \Exception('No price found for the given dates');
+            }
+
             # Step 3: Create a new booking record
             $data->setParkingSpace($availableSpace);
             $data->setTotalPrice($price);

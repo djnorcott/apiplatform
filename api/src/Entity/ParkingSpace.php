@@ -21,10 +21,6 @@ class ParkingSpace
     #[Assert\NotBlank]
     private string $label = '';
 
-    /**  Whether the parking space is active  */
-    #[ORM\Column(type: 'boolean')]
-    private bool $isActive = true;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -38,17 +34,6 @@ class ParkingSpace
     public function setLabel(string $label): self
     {
         $this->label = $label;
-        return $this;
-    }
-
-    public function getIsActive(): bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): self
-    {
-        $this->isActive = $isActive;
         return $this;
     }
 }

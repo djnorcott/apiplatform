@@ -8,22 +8,28 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\State\BookingDeleteProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\State\BookingModifyProcessor;
+use App\State\BookingCreateProcessor;
 
 #[ApiResource(
     operations: [
-        new Get(), // Allows retrieving a single booking
-        new GetCollection(), // Allows retrieving a list of bookings,
+        /**
+         * Let the automatic APi deal with the getters and delete, even though
+         * in a real API we'd only let people see & modify their own bookings
+         */
+        new Get(),
+        new GetCollection(),
+        new Delete(),
+        # Create custom processors for our create & modify operations
         new Post(
-            processor: 'App\State\BookingCreateProcessor'
-        ), // Handles booking creation
+            processor: BookingCreateProcessor::class
+        ),
         new Patch(
-            processor: 'App\State\BookingModifyProcessor'
-        ), // Handles booking modification
-        new Delete(
-            processor: 'App\State\BookingDeleteProcessor'
-        ) // Handles booking deletion
+            processor: BookingModifyProcessor::class
+        ),
     ]
 )]
 #[ORM\Entity]

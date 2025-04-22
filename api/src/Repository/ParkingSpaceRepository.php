@@ -35,7 +35,7 @@ class ParkingSpaceRepository extends ServiceEntityRepository
     }
 
 
-    public function findCostOfBooking(string $dateFrom, string $dateTo): float
+    public function findCostOfBooking(string $dateFrom, string $dateTo): ?float
     {
         return $this->getEntityManager()
             ->createQueryBuilder()

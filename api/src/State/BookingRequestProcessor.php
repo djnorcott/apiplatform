@@ -23,11 +23,19 @@ class BookingRequestProcessor implements ProcessorInterface
         /** @var ParkingSpaceRepository $repository */
         $repository = $this->entityManager->getRepository(ParkingSpace::class);
 
+        $spaces = 0;
+        $cost = $repository->findCostOfBooking($data->date_from, $data->date_to);
+
+        # If we've no cost, we can't offer a space, so don't bother looking
+        if ($cost !== null) {
+            $spaces = $repository->findNumberOfSpacesFreeOnDates($data->date_from, $data->date_to);
+        }
+
         return new BookingRequestResponse(
             $data->date_from,
             $data->date_to,
-            $repository->findNumberOfSpacesFreeOnDates($data->date_from, $data->date_to),
-            $repository->findCostOfBooking($data->date_from, $data->date_to),
+            $spaces,
+            $cost ?? 0.0,
         );
     }
 }

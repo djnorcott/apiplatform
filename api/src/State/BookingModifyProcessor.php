@@ -4,7 +4,6 @@ namespace App\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Dto\BookingModifiedResponse;
 use App\Entity\Booking;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -22,15 +21,8 @@ class BookingModifyProcessor implements ProcessorInterface
         assert($data instanceof Booking);
 
         return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $em) use ($data) {
-
-            # Step 1: Ensure this booking exists and is for the current customer
-            $existingBooking = $em->getRepository(Booking::class)->find($data->getId());
-            if ($existingBooking?->getCustomer()?->getId() !== $data->getCustomer()?->getId()) {
-                throw new \Exception('You cannot modify a booking that does not belong to you');
-            }
-
             /**
-             * Step 2: Find a parking space ID without overlapping bookings (excluding this one)
+             * Step 1: Find a parking space ID without overlapping bookings (excluding this one)
              * This might result in their booked space changing unnecessarily, but that doesn't
              * seem super important, and if it was we could cater for it
              */
@@ -55,7 +47,7 @@ class BookingModifyProcessor implements ProcessorInterface
                 throw new \Exception('No available parking space found for the given dates');
             }
 
-            # Step 3: Calculate the total price for the new booking
+            # Step 2: Calculate the total price for the new booking
             $price = $em->createQueryBuilder()
                 ->select('SUM(dp.price) AS totalPrice')
                 ->from('App\Entity\DailyPrice', 'dp')
@@ -65,7 +57,11 @@ class BookingModifyProcessor implements ProcessorInterface
                 ->getQuery()
                 ->getSingleScalarResult();
 
-            # Step 4: Update the booking record
+            if ($price === null) {
+                throw new \Exception('No price found for the given dates');
+            }
+
+            # Step 3: Update the booking record
             $data->setParkingSpace($availableSpace);
             $data->setTotalPrice($price);
             $em->persist($data);

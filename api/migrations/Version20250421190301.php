@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250421101821 extends AbstractMigration
+final class Version20250421190301 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,28 +21,22 @@ final class Version20250421101821 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            CREATE SEQUENCE booking_id_seq INCREMENT BY 1 MINVALUE 1 START 1
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE SEQUENCE customer_id_seq INCREMENT BY 1 MINVALUE 1 START 1
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE SEQUENCE parking_space_id_seq INCREMENT BY 1 MINVALUE 1 START 1
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE SEQUENCE pricing_rule_id_seq INCREMENT BY 1 MINVALUE 1 START 1
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE TABLE booking (id INT NOT NULL, date_from VARCHAR(8) NOT NULL, date_to VARCHAR(8) NOT NULL, status VARCHAR(20) NOT NULL, total_price NUMERIC(10, 2) NOT NULL, customer_id INT NOT NULL, space_id INT NOT NULL, PRIMARY KEY(id))
+            CREATE TABLE booking (id INT NOT NULL, date_from VARCHAR(8) NOT NULL, date_to VARCHAR(8) NOT NULL, total_price NUMERIC(10, 2) NOT NULL, customer_id INT NOT NULL, parking_space_id INT NOT NULL, PRIMARY KEY(id))
         SQL);
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_E00CEDDE9395C3F3 ON booking (customer_id)
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE INDEX IDX_E00CEDDE23575340 ON booking (space_id)
+            CREATE INDEX IDX_E00CEDDE45DF8272 ON booking (parking_space_id)
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE customer (id INT NOT NULL, name VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, phone VARCHAR(20) NOT NULL, PRIMARY KEY(id))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE daily_price (date VARCHAR(8) NOT NULL, price NUMERIC(10, 2) NOT NULL, pricing_rule_id INT NOT NULL, PRIMARY KEY(date))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_4AE9430DB5B58DBB ON daily_price (pricing_rule_id)
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE parking_space (id INT NOT NULL, label VARCHAR(10) NOT NULL, is_active BOOLEAN NOT NULL, PRIMARY KEY(id))
@@ -54,7 +48,10 @@ final class Version20250421101821 extends AbstractMigration
             ALTER TABLE booking ADD CONSTRAINT FK_E00CEDDE9395C3F3 FOREIGN KEY (customer_id) REFERENCES customer (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE booking ADD CONSTRAINT FK_E00CEDDE23575340 FOREIGN KEY (space_id) REFERENCES parking_space (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+            ALTER TABLE booking ADD CONSTRAINT FK_E00CEDDE45DF8272 FOREIGN KEY (parking_space_id) REFERENCES parking_space (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE daily_price ADD CONSTRAINT FK_4AE9430DB5B58DBB FOREIGN KEY (pricing_rule_id) REFERENCES pricing_rule (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
     }
 
@@ -62,28 +59,22 @@ final class Version20250421101821 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            DROP SEQUENCE booking_id_seq CASCADE
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP SEQUENCE customer_id_seq CASCADE
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP SEQUENCE parking_space_id_seq CASCADE
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP SEQUENCE pricing_rule_id_seq CASCADE
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE booking DROP CONSTRAINT FK_E00CEDDE9395C3F3
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE booking DROP CONSTRAINT FK_E00CEDDE23575340
+            ALTER TABLE booking DROP CONSTRAINT FK_E00CEDDE45DF8272
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE daily_price DROP CONSTRAINT FK_4AE9430DB5B58DBB
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE booking
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE customer
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE daily_price
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE parking_space

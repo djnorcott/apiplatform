@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250421145249 extends AbstractMigration
+final class Version20250421190649 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20250421145249 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE booking DROP status
+            ALTER TABLE parking_space DROP is_active
         SQL);
     }
 
@@ -29,7 +29,7 @@ final class Version20250421145249 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE booking ADD status VARCHAR(20) NOT NULL
+            ALTER TABLE parking_space ADD is_active BOOLEAN NOT NULL
         SQL);
     }
 }
