@@ -58,8 +58,8 @@ class BuildDailyPricesProcessorTest extends ApiTestCase
             $rule->setPriority($ruleData['priority']);
 
             $this->entityManager->persist($rule);
-            $this->entityManager->flush();
         }
+        $this->entityManager->flush();
     }
 
 
@@ -67,7 +67,7 @@ class BuildDailyPricesProcessorTest extends ApiTestCase
      * Ensure that when we call the endpoint to build the prices, the expected daily prices are created
      * representing the priorities of the pricing rules we created
      */
-    public function testBuiltDailyPrices(): void
+    public function testBuildDailyPrices(): void
     {
         $this->client->request('POST', '/build_daily_prices', [
             'headers' => [

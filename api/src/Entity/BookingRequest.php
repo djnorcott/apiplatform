@@ -33,7 +33,4 @@ class BookingRequest
         message: 'The date_to must be in the format yyyymmdd.'
     )]
     public ?string $date_to = null;
-
-    #[Assert\Type(type: ParkingSpace::class, message: 'The parking space must be a valid reference.')]
-    public ?ParkingSpace $parking_space = null;
 }
