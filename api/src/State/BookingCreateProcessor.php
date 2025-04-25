@@ -44,7 +44,7 @@ class BookingCreateProcessor implements ProcessorInterface
                 throw new \Exception('No available parking space found for the given dates');
             }
 
-            # Step 2: Ensure this booking is for the current customer
+            # Step 2: Calculate the total price for the new booking
             $price = $em->createQueryBuilder()
                 ->select('SUM(dp.price) AS totalPrice')
                 ->from('App\Entity\DailyPrice', 'dp')
