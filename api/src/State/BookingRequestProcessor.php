@@ -24,11 +24,32 @@ class BookingRequestProcessor implements ProcessorInterface
         $repository = $this->entityManager->getRepository(ParkingSpace::class);
 
         $spaces = 0;
-        $cost = $repository->findCostOfBooking($data->date_from, $data->date_to);
+        $cost = $this->entityManager
+            ->createQueryBuilder()
+            ->select('SUM(dp.price) AS totalPrice')
+            ->from('App\Entity\DailyPrice', 'dp')
+            ->where('dp.date >= :dateFrom AND dp.date <= :dateTo')
+            ->setParameter('dateFrom', $data->date_from)
+            ->setParameter('dateTo', $data->date_to)
+            ->getQuery()
+            ->getSingleScalarResult();
 
         # If we've no cost, we can't offer a space, so don't bother looking
         if ($cost !== null) {
-            $spaces = $repository->findNumberOfSpacesFreeOnDates($data->date_from, $data->date_to);
+            $spaces = $this->entityManager->createQueryBuilder()
+                ->select('COUNT(ps.id) AS numberOfFreeSpaces')
+                ->from('App\Entity\ParkingSpace', 'ps')
+                ->leftJoin(
+                    'App\Entity\Booking',
+                    'b',
+                    'WITH',
+                    'b.parkingSpace = ps.id AND b.dateFrom <= :dateTo AND b.dateTo >= :dateFrom'
+                )
+                ->where('b.id IS NULL')
+                ->setParameter('dateFrom', $data->date_from)
+                ->setParameter('dateTo', $data->date_to)
+                ->getQuery()
+                ->getSingleScalarResult();
         }
 
         return new BookingRequestResponse(
